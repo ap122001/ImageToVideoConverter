@@ -1,5 +1,5 @@
 const { spawn } = require("child_process");
-const path = require("path");
+const path      = require("path");
 
 async function renderVideo({ imagePath, audioPath }) {
   console.log("[renderer] renderVideo: start", { imagePath, audioPath });
@@ -10,11 +10,11 @@ async function renderVideo({ imagePath, audioPath }) {
     "-i", imagePath,            // input image
     "-i", audioPath,            // input audio
     "-t", "15",                 // set video length to 15 seconds
-    // "-filter:v", "scale=720:1280", // resize to 720p
+    // "-filter:v", "scale=720:1280", // optional: resize to 720×1280
     "-c:v", "libx264",          // video codec
     "-c:a", "aac",              // audio codec
     "-pix_fmt", "yuv420p",      // compatible pixel format
-    "-shortest",                // stop encoding when the shortest stream ends
+    "-shortest",                // stop at shortest stream
     "-y",                       // overwrite output
     outputPath                  // output file
   ];
@@ -30,7 +30,8 @@ async function renderVideo({ imagePath, audioPath }) {
     ffmpeg.on("close", code => {
       if (code === 0) {
         console.log("[renderer] FFmpeg finished successfully");
-        resolve(outputPath);
+        const buffer = require("fs").readFileSync(outputPath);
+        resolve(buffer);
       } else {
         reject(new Error(`FFmpeg exited with code ${code}`));
       }
